@@ -288,7 +288,7 @@ function Policies({cat, btn_txt, pol}) {
                     <td className="first-cell" style={{paddingLeft:"1vh", paddingRight:"1vh"}}>
                         <div style={{display:"flex", flexDirection:"column", gap:"2vh"}}>
                             <div>
-                                <Form.Group controlId="referenceNo">
+                                <Form.Group controlId="referenceNo" style={{width:"100%"}}>
                                     <Form.Control type="text" name="referenceNo" placeholder="Reference No" value={singleSticker.referenceNo} onChange={event => handleInputChange(index, event)} required/>
                                 </Form.Group>
                             </div>

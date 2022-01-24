@@ -22,6 +22,7 @@ import Loader from "../components/Loader";
 import { MdEdit, MdDelete, MdNotifications } from 'react-icons/md'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import useAuth from "../contexts/Auth";
+import { ImFilesEmpty } from 'react-icons/im'
 
 function Claims() {
   const [claims, setClaims] = useState([]);
@@ -59,7 +60,11 @@ function Claims() {
   const getClaims = async () => {
     const data = await getDocs(claimsCollectionRef);
     const allClaims = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-    setClaims(allClaims.filter(userClaim => userClaim.uid === authentication.currentUser.uid))
+    if(allClaims.filter(userClaim => userClaim.uid === authentication.currentUser.uid).length === 0){
+      setClaims(null)
+    } else {
+      setClaims(allClaims.filter(userClaim => userClaim.uid === authentication.currentUser.uid))
+    }
   };
 
   // Confirm Box
@@ -124,7 +129,7 @@ function Claims() {
 
   const indexOfLastEmployee = currentPage * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentClaims = claims.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const currentClaims = !claims || claims.slice(indexOfFirstEmployee, indexOfLastEmployee);
   const totalPagesNum = Math.ceil(data.length / employeesPerPage);
 
 
@@ -182,7 +187,7 @@ function Claims() {
         </div>
       </div>
 
-      {claims.length > -1 ?
+      {claims !== null && claims.length > 0 ?
       <>
 
       <Modal show={show} onHide={() => {
@@ -399,111 +404,119 @@ function Claims() {
 
          
             <Table responsive>
-            <thead>
-              <tr>
-                <th>Ref Number</th><th>Claimant Details</th><th>Date of Incident</th><th>Number Plate</th>
-                <th>Sticker Number</th><th>Claim Estimate</th><th>Status</th><th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {claims.map((claim, index) => (
-                <tr key={claim.id}>
-                  <td>{claim.refNumber}</td>
-                  <td>
-                    <b>{claim.claimantName}</b>
-                    <br />
-                    {claim.claimantEmail}
-                  </td>
-                  <td>{claim.dateOfIncident}</td>
-                  <td>{claim.numberPlate}</td>
-                  <td>{claim.stickerNumber}</td>
-                  <td>{claim.estimate}</td>
-                  <td>
-                    <Alert
-                      style={{
-                        backgroundColor: "#1475cf",
-                        color: "#fff",
-                        padding: "5px",
-                        textAlign: "center",
-                        border: "none",
-                        margin: "0",
-                      }}
-                    >
-                      new
-                    </Alert>
-                  </td>
-
-                  <td className="started">
-                                <button className="sharebtn" onClick={() => {setClickedIndex(index); setEditID(claim.id); setShowContext(!showContext)}}>&#8942;</button>
-
-                                <ul  id="mySharedown" className={(showContext && index === clickedIndex) ? 'mydropdown-menu show': 'mydropdown-menu'} onClick={(event) => event.stopPropagation()}>
-                                            <li>
-                                                  <div className="actionDiv">
-                                                    <i><MdNotifications/></i> View Notification
-                                                  </div>
-                                            </li>
-
-                                            <li onClick={() => setShowContext(false)}
-                                                >
-                                                  <div className="actionDiv">
-                                                    <i><AiFillCloseCircle/></i> Claim Settlement
-                                                  </div>
-                                            </li>
-
-                                            <li onClick={() => setShowContext(false)}
-                                                >
-                                                  <div className="actionDiv">
-                                                    <i><AiFillCloseCircle/></i> View Settlement
-                                                  </div>
-                                            </li>
-
-                                            <li onClick={() => setShowContext(false)}
-                                                >
-                                                  <div className="actionDiv">
-                                                    <i><AiFillCloseCircle/></i> Cancel
-                                                  </div>
-                                            </li>
-
-                                            <li onClick={() => {
-                                                  setOpenToggle(true)
-                                                  setEditID(claim.id);
-                                                  setShowContext(false)
-                                                }}
-                                                >
-                                                  <div className="actionDiv">
-                                                    <i><MdDelete/></i> Delete
-                                                  </div>
-                                            </li>
-
-                                            <li onClick={() => {
-                                                  setShowContext(false)
-                                                  setEditID(claim.id);
-                                                  getSingleDoc(claim.id);
-                                                  handleShow();
-                                                }}
-                                                >
-                                                  <div className="actionDiv">
-                                                    <i><MdEdit/></i> Edit
-                                                  </div>
-                                            </li>
-                                </ul>
-                              </td>
-
+            <Form>
+              <thead>
+                <tr>
+                  <th>Ref Number</th><th>Claimant Details</th><th>Date of Incident</th><th>Number Plate</th>
+                  <th>Sticker Number</th><th>Claim Estimate</th><th>Status</th><th>Action</th><th>
+                    {
+                      <Form.Check>
+                        <Form.Check.Input />
+                      </Form.Check>
+                    }
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <th>Ref Number</th>
-                <th>Claimant Details</th>
-                <th>Date of Incident</th>
-                <th>Number Plate</th>
-                <th>Sticker Number</th>
-                <th>Claim Estimate</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </tfoot>
+              </thead>
+              <tbody>
+                {claims.map((claim, index) => (
+                  <tr key={claim.id}>
+                    <td>{claim.refNumber}</td>
+                    <td>
+                      <b>{claim.claimantName}</b>
+                      <br />
+                      {claim.claimantEmail}
+                    </td>
+                    <td>{claim.dateOfIncident}</td>
+                    <td>{claim.numberPlate}</td>
+                    <td>{claim.stickerNumber}</td>
+                    <td>{claim.estimate}</td>
+                    <td>
+                      <Alert
+                        style={{
+                          backgroundColor: "#1475cf",
+                          color: "#fff",
+                          padding: "5px",
+                          textAlign: "center",
+                          border: "none",
+                          margin: "0",
+                        }}
+                      >
+                        new
+                      </Alert>
+                    </td>
+
+                    <td className="started">
+                                  <button className="sharebtn" onClick={() => {setClickedIndex(index); setEditID(claim.id); setShowContext(!showContext)}}>&#8942;</button>
+
+                                  <ul  id="mySharedown" className={(showContext && index === clickedIndex) ? 'mydropdown-menu show': 'mydropdown-menu'} onClick={(event) => event.stopPropagation()}>
+                                              <li>
+                                                    <div className="actionDiv">
+                                                      <i><MdNotifications/></i> View Notification
+                                                    </div>
+                                              </li>
+
+                                              <li onClick={() => setShowContext(false)}
+                                                  >
+                                                    <div className="actionDiv">
+                                                      <i><AiFillCloseCircle/></i> Claim Settlement
+                                                    </div>
+                                              </li>
+
+                                              <li onClick={() => setShowContext(false)}
+                                                  >
+                                                    <div className="actionDiv">
+                                                      <i><AiFillCloseCircle/></i> View Settlement
+                                                    </div>
+                                              </li>
+
+                                              <li onClick={() => setShowContext(false)}
+                                                  >
+                                                    <div className="actionDiv">
+                                                      <i><AiFillCloseCircle/></i> Cancel
+                                                    </div>
+                                              </li>
+
+                                              <li onClick={() => {
+                                                    setOpenToggle(true)
+                                                    setEditID(claim.id);
+                                                    setShowContext(false)
+                                                  }}
+                                                  >
+                                                    <div className="actionDiv">
+                                                      <i><MdDelete/></i> Delete
+                                                    </div>
+                                              </li>
+
+                                              <li onClick={() => {
+                                                    setShowContext(false)
+                                                    setEditID(claim.id);
+                                                    getSingleDoc(claim.id);
+                                                    handleShow();
+                                                  }}
+                                                  >
+                                                    <div className="actionDiv">
+                                                      <i><MdEdit/></i> Edit
+                                                    </div>
+                                              </li>
+                                  </ul>
+                                </td>
+
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Ref Number</th>
+                  <th>Claimant Details</th>
+                  <th>Date of Incident</th>
+                  <th>Number Plate</th>
+                  <th>Sticker Number</th>
+                  <th>Claim Estimate</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </tfoot>
+            </Form>
           </Table>
 
   
@@ -511,7 +524,17 @@ function Claims() {
         
       </div>
       </>
-      : <Loader />}
+      :
+        claims === null
+        ?
+          <div className="no-table-data">
+            <i><ImFilesEmpty /></i>
+            <h4>No data yet</h4>
+            <p>You have not created any Motor Third Party Stickers Yet</p>
+          </div>
+        :
+          <Loader />
+      }
     </div>
   );
 }
