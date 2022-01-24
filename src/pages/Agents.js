@@ -1,22 +1,73 @@
-import { Link } from 'react-router-dom'
+import { generatePath, Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { MdDownload } from 'react-icons/md'
+import { MdDownload, MdDetails } from 'react-icons/md'
 import Pagination from '../helpers/Pagination';
 import SearchBar from '../components/searchBar/SearchBar'
 import Header from '../components/header/Header';
-import { functions, authentication } from '../helpers/firebase';
+import { functions, authentication, db } from '../helpers/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { Table } from 'react-bootstrap'
 import useAuth from '../contexts/Auth';
 import { MdEdit, MdDelete } from 'react-icons/md'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import Loader from '../components/Loader';
+import useDialog from '../hooks/useDialog';
+import { Modal } from 'react-bootstrap';
+import Details from './Details';
+import { getDocs, collection } from 'firebase/firestore'
+
+
 
 function Agents() {
 
-  useEffect(() => {document.title = 'Britam - Agents';getAgents()}, [])
+  const [stickers, setStickers] = useState(0)
+  const [claims, setClaims ] = useState(0)
+  const [claimNotifications, setClaimNotifications] = useState(0)
+
+  useEffect(
+    async() => {            
+    document.title = 'Britam - Agents'
+    const listUsers = httpsCallable(functions,'listUsers')
+    listUsers().then(({ data }) => {
+        if(authClaims?.supervisor) {
+          const myAgents = data.filter(user => user.role.agent === true && user?.meta.added_by_uid === authentication.currentUser.uid)
+          setAgents(myAgents)
+          console.log(myAgents)
+          const agentIds = myAgents.map(agent => agent.uid)
+          return agentIds
+
+        } else if (authClaims?.admin) {
+          const supervisors = data.filter( user => user?.role?.supervisor === true && user?.meta?.added_by_uid === authentication.currentUser.uid).map(supervisor => supervisor.uid)
+          console.log(supervisors)
+          const myAgents = data.filter(user => user?.role?.agent === true).filter(user => [...supervisors, authentication.currentUser.uid].includes(user.meta.added_by_uid))
+          setAgents(myAgents)
+          console.log(data.filter(user => user.role.agent === true))
+          console.log(myAgents)
+          console.log([...supervisors, authentication.currentUser.uid])
+          return [...supervisors, authentication.currentUser.uid]
+
+        } else if (authClaims?.agent) {
+            return[authentication.currentUser.uid]
+        }
+        
+    }).then(async (userIDs) =>{
+        console.log(userIDs)
+        const policies = await getPolicies(collection(db, 'policies'))
+        setStickers(policies.filter(policy => userIDs.includes(policy.added_by_uid)).reduce((policy, sum) => policy.stickersDetails.length + sum, 0))
+        return await policies.filter(policy => userIDs.includes(policy.added_by_uid)).reduce((policy, sum) => policy.stickersDetails.length + sum, 0)
+    }).catch((error) => {
+        console.log(error)
+    })
+  }, [])
+
+  const getPolicies = async (policyCollectionRef) => {
+    const data = await getDocs(policyCollectionRef);
+    const allPolicies = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    return allPolicies
+  }
   
   const { authClaims } = useAuth()
+  const [ open, handleShow, handleClose] = useDialog(); 
   
   // get agents
   const [agents, setAgents] = useState([]);
@@ -27,9 +78,14 @@ function Agents() {
           const myAgents = data.filter(user => user.role.agent === true).filter(agent => agent.meta.added_by_uid === authentication.currentUser.uid)
           setAgents(myAgents)
       }).catch()
-    } else{
+    } else if(authClaims.admin){
       listUsers().then(({data}) => {
-        const myAgents = data.filter(user => user.role.agent === true)
+        const mySupervisors = data.filter(user => user.role.supervisor === true).filter(supervisor => supervisor.meta.added_by_uid === authentication.currentUser.uid).map(supervisoruid => supervisoruid.uid)
+
+        const agentsUnderAdmin = [ ...mySupervisors, authentication.currentUser.uid ]
+
+        const myAgents = data.filter(user => user.role.agent === true).filter(agent => agentsUnderAdmin.includes(agent.meta.added_by_uid))
+
         setAgents(myAgents)
     }).catch()
     }
@@ -40,35 +96,32 @@ function Agents() {
   const handleSearch = ({ target: {value} }) => setSearchText(value);
   const searchByName = (data) => data.filter(row => row.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1)
 
+  // Pagination
+  const [ currentPage, setCurrentPage ] = useState(1)
+  const [clientsPerPage] = useState(10)
+  const indexOfLastAgent = currentPage * clientsPerPage
+  const indexOfFirstClient = indexOfLastAgent - clientsPerPage
+  const currentAgents = !agents || searchByName(agents).slice(indexOfFirstClient, indexOfLastAgent)
+  const totalPagesNum = !agents || Math.ceil(agents.length / clientsPerPage)
 
-
-    // Pagination
-    const [ currentPage, setCurrentPage ] = useState(1)
-    const [clientsPerPage] = useState(10)
-    const indexOfLastAgent = currentPage * clientsPerPage
-    const indexOfFirstClient = indexOfLastAgent - clientsPerPage
-    const currentAgents = !agents || searchByName(agents).slice(indexOfFirstClient, indexOfLastAgent)
-    const totalPagesNum = !agents || Math.ceil(agents.length / clientsPerPage)
-
-    // delete agent
-    const handleDelete = async (id) => {
-      const deleteUser = httpsCallable(functions, 'deleteUser')
-      deleteUser({uid:id}).then().catch(err => {
-        console.log(err)
-      })
-      getAgents()
-    };
-
+  // delete agent
+  const handleDelete = async (id) => {
+    const deleteUser = httpsCallable(functions, 'deleteUser')
+    deleteUser({uid:id}).then().catch(err => {
+      console.log(err)
+    })
+    getAgents()
+  };
     
-    // actions context
-    const [showContext, setShowContext] = useState(false)
-    window.onclick = function(event) {
-        if (!event.target.matches('.sharebtn')) {
-            setShowContext(false)
-        }
-    }
+  // actions context
+  const [showContext, setShowContext] = useState(false)
+  window.onclick = function(event) {
+      if (!event.target.matches('.sharebtn')) {
+          setShowContext(false)
+      }
+  }
 
-    const [clickedIndex, setClickedIndex] = useState(null)
+  const [clickedIndex, setClickedIndex] = useState(null)
 
     return (
         <div className='components'>
@@ -100,7 +153,7 @@ function Agents() {
 
                   <Table hover striped responsive>
                         <thead>
-                            <tr><th>#</th><th>Name</th><th>Email</th><th>Gender</th><th>Contact</th><th>Address</th><th>Action</th></tr>
+                            <tr><th>#</th><th>Name</th><th>Email</th><th>Gender</th><th>Contact</th><th>Address</th>{authClaims.admin && <th>Added by</th>}<th>Action</th></tr>
                         </thead>
                         <tbody>
                           {agents.map((agent, index) => (
@@ -111,11 +164,26 @@ function Agents() {
                               <td>{agent.meta.gender}</td>
                               <td>{agent.meta.phone}</td>
                               <td>{agent.meta.address}</td>
-                              
+                              {authClaims.admin && <td>{agent.meta.added_by_name}</td>}
                               <td className="started">
                                 <button className="sharebtn" onClick={() => {setClickedIndex(index); setShowContext(!showContext)}}>&#8942;</button>
 
                                 <ul  id="mySharedown" className={(showContext && index === clickedIndex) ? 'mydropdown-menu show': 'mydropdown-menu'} onClick={(event) => event.stopPropagation()}>
+                                            <li onClick={handleShow}
+                                              > 
+                                                <div className="actionDiv">
+                                                    <i><MdDetails /></i>Details
+                                                </div>
+                                            </li>
+                                            <Modal show={open} onHide={handleClose}>
+                                              <Modal.Header closeButton>
+                                                <Modal.Title>{`${agent.name}'s details.`}</Modal.Title>
+                                              </Modal.Header>
+                                              <Modal.Body>
+                                                <Details TotalStickers={stickers} totalClaims={claims} totalClaimNotifications={claimNotifications}/>
+                                              </Modal.Body>
+                                              <Modal.Footer><button onClick={handleClose}>Close</button></Modal.Footer>
+                                            </Modal>
                                             <li onClick={() => {
                                                         setShowContext(false)
                                                         const confirmBox = window.confirm(
@@ -153,7 +221,7 @@ function Agents() {
                           ))}
                         </tbody>
                         <tfoot>
-                            <tr><th>#</th><th>Name</th><th>Email</th><th>Gender</th><th>Contact</th><th>Address</th><th>Action</th></tr>
+                            <tr><th>#</th><th>Name</th><th>Email</th><th>Gender</th><th>Contact</th><th>Address</th>{authClaims.admin && <th>Added by</th>}<th>Action</th></tr>
                         </tfoot>
                     </Table>
 
