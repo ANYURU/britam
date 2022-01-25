@@ -22,28 +22,27 @@ function Agents() {
 
   const [stickers, setStickers] = useState(0)
   const [claims, setClaims ] = useState(0)
-  const [claimNotifications, setClaimNotifications] = useState(0)
+  const [settledClaims, setSettledClaims] = useState(0)
+  const [organisations, setOrganisations] = useState(0)
 
-  useEffect(
-    async() => {            
+  useEffect(() => {
     document.title = 'Britam - Agents'
+    process()
+  }, [])
+
+  const process = async() => {            
     const listUsers = httpsCallable(functions,'listUsers')
     listUsers().then(({ data }) => {
         if(authClaims?.supervisor) {
           const myAgents = data.filter(user => user.role.agent === true && user?.meta.added_by_uid === authentication.currentUser.uid)
           setAgents(myAgents)
-          console.log(myAgents)
           const agentIds = myAgents.map(agent => agent.uid)
           return agentIds
 
         } else if (authClaims?.admin) {
           const supervisors = data.filter( user => user?.role?.supervisor === true && user?.meta?.added_by_uid === authentication.currentUser.uid).map(supervisor => supervisor.uid)
-          console.log(supervisors)
           const myAgents = data.filter(user => user?.role?.agent === true).filter(user => [...supervisors, authentication.currentUser.uid].includes(user.meta.added_by_uid))
           setAgents(myAgents)
-          console.log(data.filter(user => user.role.agent === true))
-          console.log(myAgents)
-          console.log([...supervisors, authentication.currentUser.uid])
           return [...supervisors, authentication.currentUser.uid]
 
         } else if (authClaims?.agent) {
@@ -51,19 +50,37 @@ function Agents() {
         }
         
     }).then(async (userIDs) =>{
-        console.log(userIDs)
         const policies = await getPolicies(collection(db, 'policies'))
         setStickers(policies.filter(policy => userIDs.includes(policy.added_by_uid)).reduce((policy, sum) => policy.stickersDetails.length + sum, 0))
-        return await policies.filter(policy => userIDs.includes(policy.added_by_uid)).reduce((policy, sum) => policy.stickersDetails.length + sum, 0)
+
+        const claims = await getClaims(collection(db, 'claims'))
+        setClaims(claims.filter(claim => userIDs.includes(claim.uid)).length)
+        setSettledClaims(claims.filter(claim => claim?.status !== "pending" && claim.status !== "").length)
+        
+        const organisations = await getOrganisations(collection(db, 'organisations'))
+        console.log(organisations)
+        setOrganisations(organisations.filter(organisation => userIDs.includes(organisation.uid)).length)    
     }).catch((error) => {
         console.log(error)
     })
-  }, [])
+  }
 
   const getPolicies = async (policyCollectionRef) => {
     const data = await getDocs(policyCollectionRef);
     const allPolicies = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
     return allPolicies
+  }
+
+  const getClaims = async (claimsCollectionRef) => {
+    const data = await getDocs(claimsCollectionRef);
+    const allClaims = data.docs.map((doc) => ({ ...doc.data(), id:doc.id }))
+    return allClaims
+  }
+
+  const getOrganisations = async (organisationsCollectionRef) => {
+    const data = await getDocs(organisationsCollectionRef);
+    const organisations = data.docs.map((doc) => ({ ...doc.data(), id:doc.id}))
+    return organisations
   }
   
   const { authClaims } = useAuth()
@@ -169,7 +186,7 @@ function Agents() {
                                 <button className="sharebtn" onClick={() => {setClickedIndex(index); setShowContext(!showContext)}}>&#8942;</button>
 
                                 <ul  id="mySharedown" className={(showContext && index === clickedIndex) ? 'mydropdown-menu show': 'mydropdown-menu'} onClick={(event) => event.stopPropagation()}>
-                                            <li onClick={handleShow}
+                                            <li onClick={() => {handleShow(); setShowContext(false)}} 
                                               > 
                                                 <div className="actionDiv">
                                                     <i><MdDetails /></i>Details
@@ -180,9 +197,9 @@ function Agents() {
                                                 <Modal.Title>{`${agent.name}'s details.`}</Modal.Title>
                                               </Modal.Header>
                                               <Modal.Body>
-                                                <Details TotalStickers={stickers} totalClaims={claims} totalClaimNotifications={claimNotifications}/>
+                                                <Details totalStickers={stickers} totalClaims={claims} settledClaims={settledClaims}/>
                                               </Modal.Body>
-                                              <Modal.Footer><button onClick={handleClose}>Close</button></Modal.Footer>
+                                              {/* <Modal.Footer><button onClick={handleClose}>Close</button></Modal.Footer> */}
                                             </Modal>
                                             <li onClick={() => {
                                                         setShowContext(false)
