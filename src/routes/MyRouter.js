@@ -22,6 +22,7 @@ import AgentMtpCompMenu from '../pages/agent/AgentMtpCompMenu'
 
 import SuperAdminMenu from '../pages/superAdmin/SuperAdminMenu'
 import { BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import Chat from '../components/messenger/Chat'
 
 function MyRouter() {
 
@@ -69,6 +70,9 @@ function MyRouter() {
                     <AgentsRoutes />
                     <SuperAdminRoutes />
                 </main>
+                <div style={{position:"fixed", display:"flex", justifyContent:"flex-end", width:"100%", height:"100%", alignItems:"end", paddingRight:"4%"}}> 
+                    <Chat/>
+                </div>
             </div>
                
         </Router>

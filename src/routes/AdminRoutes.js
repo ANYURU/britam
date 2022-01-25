@@ -26,13 +26,15 @@ import Transit from '../pages/Transit'
 import AddStickerRange from '../pages/admin/AddStickerRange'
 import PolicyDetails from '../pages/PolicyDetails/PolicyDetails'
 import PolicyRenew from '../pages/PolicyDetails/PolicyRenew'
+import Chat from '../components/messenger/Chat'
 
 
 function AdminRoutes() {
     return (
-        <>
+        <>  
             <PrivateRoute path="/admin/dashboard" >
                 <Dashboard />
+                {/* <Chat /> */}
             </PrivateRoute>
             <PrivateRoute path="/admin/organisations" >
                 <Organisations />

@@ -11,6 +11,7 @@ import { httpsCallable } from 'firebase/functions';
 import Loader from '../components/Loader'
 import { authentication } from '../helpers/firebase'
 import moment from 'moment'
+import Chat from '../components/messenger/Chat'
 
 function Dashboard() {
     const [clients, setClients] = useState([]);
