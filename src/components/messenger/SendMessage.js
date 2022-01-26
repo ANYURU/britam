@@ -1,6 +1,6 @@
 import {useState} from 'react';
-import {Form, Button} from 'react-bootstrap';
-import './formStyles.css'
+import {Form} from 'react-bootstrap';
+import './messenger.css'
 import {AiOutlineSend} from 'react-icons/ai'
 
 function SendMessage({scroll}) {

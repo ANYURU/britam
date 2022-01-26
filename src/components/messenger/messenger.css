@@ -7,3 +7,11 @@ input:focus {
 form {
     margin-top:-20px;
 }
+
+.collapse-form {
+    max-height:0px;    
+}
+
+.collapse-chatbox {
+    height:50px;
+}

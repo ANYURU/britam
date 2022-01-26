@@ -2,7 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import {db, collection} from '../../helpers/firebase';
 import SendMessage from './SendMessage';
 import {IoArrowBackOutline} from 'react-icons/io5'
-import {FaAngleDoubleDown} from 'react-icons/fa'
+import {FaAngleDoubleDown, FaAngleDoubleUp} from 'react-icons/fa'
+import './messenger.css'
 
 
 
@@ -10,6 +11,7 @@ function Chat() {
     const [ messages, setMessages ] = useState([{text:'Hello', uid: "001", date:"Jan 24 2009"}, {text:'Hi', uid:"002", date:"Aug 23, 2021"},{text: "How're you doing? How was your day? Hope everything is okay. I would like to know you in person.", uid:"003", date:"Mar 21, 2022"}, {text:"I was supposed to come today but unfortunately. My puppy Machelle, fell sick and had to be rushed to the hospital. He started convulsing all of a sudden", date:"Jan 4, 2022"}])
     const [ user, setUser ] = useState('Anyuru David Derrick')
     const [ selectedChat, setSelectedChat ] = useState(false)
+    const [ expanded, setExpanded ] = useState(false)
     const scroll = useRef()
 
     // useEffect(()=> {
@@ -19,9 +21,8 @@ function Chat() {
         
 
     // }, [])
-  return (
-      
-        <div style={{display:"flex", flexDirection:"column", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px"}} className="shadow-sm">
+  return (     
+        <div id="chatbox" style={{display:"flex", flexDirection:"column", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px"}} className="shadow-sm collapse-chatbox" >
             <div style={{display:"flex", backgroundColor:"white", position:"relative", height:"80px", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", opacity:"0.7", paddingTop:"10px", paddingLeft:"20px", justifyContent:"space-between"}} >
                 <div style={{display:"flex", gap:"5px"}}>
                     <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
@@ -31,8 +32,18 @@ function Chat() {
                         {user}  
                     </div>
                 </div>
-                <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none", marginRight:"20px"}}>
-                    <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><FaAngleDoubleDown /></i>
+                <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none", marginRight:"20px"}} onClick={()=>{
+                    if(expanded === false) {
+                        document.getElementById("chatbox").classList.remove("collapse-chatbox")
+                        document.getElementById("msg-form").classList.remove("collapse-form")
+                        setExpanded(!expanded)
+                    } else {
+                        document.getElementById("chatbox").classList.add("collapse-chatbox")
+                        document.getElementById("msg-form").classList.add("collapse-form")
+                        setExpanded(!expanded)
+                    }
+                }}>
+                    <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}>{expanded === true ? <FaAngleDoubleDown /> : <FaAngleDoubleUp />}</i>
                 </button>
             </div>
                 
@@ -57,7 +68,7 @@ function Chat() {
                     );
                 })}
             </div>
-            <div style={{width:"100%", backgroundColor:"white", borderTop:"solid 1px #eff3f4", height:"50px"}}>
+            <div id="msg-form" style={{width:"100%", backgroundColor:"white", borderTop:"solid 1px #eff3f4", height:"50px"}} className="collapse-form">
                 <SendMessage scroll={scroll}/>
             </div>
             <div ref={scroll}></div>
