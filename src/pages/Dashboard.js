@@ -30,6 +30,7 @@ function Dashboard() {
         getAdmins()
         getPolicies()
         setStickers(handlePolicyStickers(await getPolicies()))
+        console.log(authentication.currentUser.uid)
     }, [])
 
     // policies
