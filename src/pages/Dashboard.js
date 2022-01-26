@@ -229,6 +229,9 @@ function Dashboard() {
                         </Row>
                     </div>
                 </div>  
+                <div style={{position:"fixed", display:"flex", justifyContent:"flex-end", height:"100%", alignItems:"end", justifyContent:"flex-end", width:"80%"}}> 
+                    <Chat/>
+                </div>
             </div>
         )
 }

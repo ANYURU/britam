@@ -31,10 +31,9 @@ import Chat from '../components/messenger/Chat'
 
 function AdminRoutes() {
     return (
-        <>  
+        <>
             <PrivateRoute path="/admin/dashboard" >
                 <Dashboard />
-                {/* <Chat /> */}
             </PrivateRoute>
             <PrivateRoute path="/admin/organisations" >
                 <Organisations />

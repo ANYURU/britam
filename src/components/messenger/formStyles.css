@@ -1,0 +1,9 @@
+input:focus {
+    outline: none !important;
+    border: none;
+}
+
+
+form {
+    margin-top:-20px;
+}
