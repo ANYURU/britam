@@ -10,17 +10,15 @@ import {FaAngleDoubleDown, FaAngleDoubleUp} from 'react-icons/fa'
 import {BiEnvelope} from 'react-icons/bi'
 import {IoCloseSharp} from 'react-icons/io5'
 
-import useDialog from '../../hooks/useDialog'
 import './messenger.css'
 
 
 
 
 function Chat() {
-    const [ open, handleShow, handleClose] = useDialog()
-    const [ acceptedChats, setAcceptedChats ] = useState([{name:"Kizito Douglas"}, {name:"KiKibirango Sumayiya"}, {name:"Anyuru David Derrick"}, {name:"Charles Kasasira Derrick"}])
+    const [ acceptedChats, setAcceptedChats ] = useState([{name:"Kizito Douglas"}, {name:"Nakityo Joanita"}, {name:"Anyuru David Derrick"}, {name:"Charles Kasasira Derrick"}])
 
-
+    const [ search, setSearch ] = useState(false)
     const [ displayMessages, setDisplayMessages ] = useState(false)
     const [ messages, setMessages ] = useState([{text:'Hello', uid: "001", date:"Jan 24 2009", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUid:"09398938"}, {text:'Hi', uid:"002", date:"Aug 23, 2021", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUId:"09398938"},{text: "How're you doing? How was your day? Hope everything is okay. I would like to know you in person.", uid:"003", date:"Mar 21, 2022", sendersUid:"09398938", receiversUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3"}, {text:"I was supposed to come today but unfortunately. My puppy Machelle, fell sick and had to be rushed to the hospital. He started convulsing all of a sudden", date:"Jan 4, 2022", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUid:"09398938"}])
     const [ user, setUser ] = useState(authentication.currentUser.displayName)
@@ -38,7 +36,7 @@ function Chat() {
 
     // }, [])
   return (     
-        <div id="chatbox" style={{display:"flex", flexDirection:"column", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px"}} className="shadow-sm collapse-chatbox" >
+        <div id="chatbox" style={{display:"flex", flexDirection:"column", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", width:"350px"}} className="shadow-sm collapse-chatbox" >
             {
                 selectChat === false 
                 ? 
@@ -46,6 +44,8 @@ function Chat() {
                     <div style={{display:"flex", gap:"5px"}}>
                         <button onClick={() => {
                             setSelectChat(true)
+                            document.getElementById("msg-form").classList.remove("expand-form")
+                            document.getElementById("msg-form").classList.add("collapse-form")
                         }} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
                             <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><IoArrowBackOutline /></i>
                         </button>
@@ -73,65 +73,27 @@ function Chat() {
                         Messages 
                     </div>
                     <div style={{display:"flex", gap:"5px"}}>
-                        <button onClick={handleShow} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
-                            <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><BiEnvelope /></i>
+                        {
+                            search === true && <input />
+                        }
+                        <button onClick={() => {
+                            setSearch(!search)
+                        }} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
+                            <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}>{search === true ? <IoCloseSharp /> : <BiEnvelope />}</i>
                         </button>
                         <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none", marginRight:"20px"}} onClick={()=>{
                             if(expanded === false) {
                                 document.getElementById("chatbox").classList.remove("collapse-chatbox")
-                                document.getElementById("msg-form").classList.remove("collapse-form")
+                                document.getElementById("msg-form").classList.add("collapse-form")
                                 setExpanded(!expanded)
                             } else {
                                 document.getElementById("chatbox").classList.add("collapse-chatbox")
                                 document.getElementById("msg-form").classList.add("collapse-form")
                                 setExpanded(!expanded)
                             }
-
-                            
-
-
-
                         }}>
                             <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}>{expanded === true ? <FaAngleDoubleDown /> : <FaAngleDoubleUp />}</i>
                         </button>
-
-                        <Modal show={open} onHide={handleClose} className="sm-shadow" style={{border:"none"}}>
-                                <Modal.Header>
-                                    <Modal.Title>
-                                        <div style={{display:"flex", gap:"5px"}}> 
-                                            <button onClick={handleClose} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
-                                                <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9", fontSize:"17px"}}><IoCloseSharp /></i>
-                                            </button>   
-                                            <h6 style={{fontSize:"18px", opacity:"0.9", paddingTop:"5px"}}>
-                                                New Message
-                                            </h6>
-                                        </div>
-                                    </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body style={{borderTop:"solid 0.2px #cfd9de", overflow:"scroll", scrollBehavior:"smooth"}}>
-                                {
-                                    previousChats.map(({
-                                        name,
-                                        photoURL
-                                    }, index) => {
-                                        return (
-                                            <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={(event) => {
-                                                event.preventDefault()
-                                                setPreviousChats(...previousChats, {name, photoURL})
-
-                                            }}>
-                                                <div>
-                                                    <div style={{width:"30px",  height:"30px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
-                                                </div>
-                                                
-                                                <p style={{paddingTop:"6px", height:"100%"}}>{name}</p>
-                                                
-                                            </div>
-                                        );
-                                    }) 
-                                }
-                                </Modal.Body>
-                        </Modal>
                     </div>
                 </div>
                 
@@ -139,24 +101,60 @@ function Chat() {
                 
             <div style={{height:"400px", width:"300px", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", paddingLeft:"20px", overflow:"scroll", scrollBehavior:"smooth"}}>
                 {
-                    selectChat === true ?
-                    previousChats.map(({
-                        name,
-                        photoURL
-                    }, index) => {
-                        return (
-                            <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={() => {
-                                setSelectChat(!selectChat)
-                            }}>
-                                <div>
-                                    <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
-                                </div>
-                                <div key={index} style={{marginTop: "25px", display:"flex", alignItems:"center", height:"100%"}}>
-                                    <p>{name}</p>
-                                </div>
-                            </div>
-                        );
-                    }) 
+                    selectChat === true ? 
+                    <>
+                        {
+                            search === false ?
+                            <>
+                                <div>Previous Chats</div>
+                                {
+                                    previousChats.map(({
+                                        name,
+                                        photoURL
+                                    }, index) => {
+                                        return (
+                                            <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={() => {
+                                                setSelectChat(!selectChat)
+                                                document.getElementById("msg-form").classList.add("expand-form")
+                                                document.getElementById("msg-form").classList.remove("collapse-form")
+                                            }}>
+                                                <div>
+                                                    <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
+                                                </div>
+                                                <div key={index} style={{marginTop: "25px", display:"flex", alignItems:"center", height:"100%"}}>
+                                                    <p>{name}</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                } 
+                            </>
+                        :
+                        <>
+                            <div>Start a new Chat</div>
+                            {
+                                acceptedChats.map(({
+                                    name,
+                                    photoURL
+                                }, index) => {
+                                    return (
+                                        <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={() => {
+                                            setSelectChat(!selectChat)
+                                        }}>
+                                            <div>
+                                                <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
+                                            </div>
+                                            <div key={index} style={{marginTop: "25px", display:"flex", alignItems:"center", height:"100%"}}>
+                                                <p>{name}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            } 
+                        </>
+                        }
+
+                    </>
                     :
                     messages.map(({text, date, sendersUid}, index) => {
                         if(sendersUid === authentication.currentUser.uid) {
