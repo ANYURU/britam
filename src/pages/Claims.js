@@ -540,3 +540,4 @@ function Claims() {
 }
 
 export default Claims;
+

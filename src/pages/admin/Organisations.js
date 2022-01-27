@@ -17,6 +17,7 @@ import { AiFillCloseCircle } from 'react-icons/ai'
 import '../../components/modal/ConfirmBox.css'
 import Loader from '../../components/Loader'
 import { ImFilesEmpty } from 'react-icons/im'
+import useDialog from "../../hooks/useDialog";
 
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -56,9 +57,9 @@ export default function Organisations() {
   }
 
   const [editID, setEditID] = useState(null);
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const [ show, handleShow, handleClose ] = useDialog();
+
+
   const [ searchText, setSearchText ] = useState('')
 
   const [fields, handleFieldChange] = useForm({
@@ -146,11 +147,7 @@ export default function Organisations() {
 
 
 
-      <Modal show={show} onHide={() =>
-        {
-          handleClose()
-          setSingleDoc(fields)
-        }}>
+      <Modal show={show} onHide={handleClose}>
         <OrganisationModal fields={fields} singleDoc={singleDoc} handleClose={handleClose} handleFieldChange={handleFieldChange} editID={editID} />
       </Modal>
 
@@ -217,7 +214,7 @@ export default function Organisations() {
           <tbody>
             {currentOrganisations.map((organisation, index) => (
               <tr key={organisation.id}>
-                <td>{organisation.logo}</td>
+                <td><img src={organisation.logo} width={40} height={40} style={{borderRadius: "50%"}} /></td>
                 <td>{organisation.name}</td>
                 <td>{organisation.org_email}</td>
                 <td>{organisation.tel}</td>
@@ -243,8 +240,8 @@ export default function Organisations() {
                                 </li>
                                 <li onClick={() => {
                                         setShowContext(false)
-                                        setEditID(organisation.uid);
-                                        getSingleDoc(organisation.uid)
+                                        setEditID(organisation.id);
+                                        getSingleDoc(organisation.id)
                                         handleShow();
                                       }}
                                     >

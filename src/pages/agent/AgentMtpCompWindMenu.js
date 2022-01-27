@@ -14,11 +14,11 @@ import { Badge } from 'react-bootstrap'
 import { ImProfile } from 'react-icons/im'
 import useAuth from '../../contexts/Auth'
 
-function AgentMtpMenu({setLargeContentClass, largeContentClass}) {
+function AgentMtpCompWindMenu({setLargeContentClass, largeContentClass}) {
 
-    const { Agent_mtp } = menuData
+    const { Agent_mtp_comprehensive_windscreen } = menuData
 
-    const [ selected, setSelected ] = useState({ activeObject: null, Agent_mtp })
+    const [ selected, setSelected ] = useState({ activeObject: null, Agent_mtp_comprehensive_windscreen })
     const [ toggleMenu, setToggeMenu ] = useState(true)
     const [ openFooterContext, setOpenFooterContext ] = useState(false)
 
@@ -26,7 +26,7 @@ function AgentMtpMenu({setLargeContentClass, largeContentClass}) {
 
     return (
         <div className='menuSide'>
-            <MobileNav role={Agent_mtp} user="agent" displayName={authentication?.currentUser?.displayName}/>
+            <MobileNav role={Agent_mtp_comprehensive_windscreen} user="agent" displayName={authentication?.currentUser?.displayName}/>
             {toggleMenu === true 
             ?
                     <nav className="sidebar">
@@ -42,19 +42,12 @@ function AgentMtpMenu({setLargeContentClass, largeContentClass}) {
                                     
                             </div>
                         </div>
-                        <SideBar role={Agent_mtp} user="agent" displayName={authentication?.currentUser?.displayName} />
+                        <SideBar role={Agent_mtp_comprehensive_windscreen} user="agent" displayName={authentication?.currentUser?.displayName} />
 
                         <footer>
                             {/* <Link to='/admin/settings'> */}
                             <div className="footerContext" onClick={() => setOpenFooterContext(!openFooterContext)}>
-                                {authentication.currentUser.photoURL !== "https://firebasestorage.googleapis.com/v0/b/car-insurance-app.appspot.com/o/default-user-image.png?alt=media&token=f9f8f8e9-f8f8-4f8f-8f8f-f8f8f8f8f8f8"
-                                ?
-                                    <img src={authentication.currentUser.photoURL} alt='profile' width={50} height={50} style={{borderRadius: "50%"}}/>
-                                :
-                                    <DefaultAvatar />
-                                }
-                                
-                                
+                                <DefaultAvatar />
                                 <div>
                                     <p style={{"fontWeight": "500", "fontSize": "1.05rem"}}>{authentication?.currentUser?.displayName}</p>
                                     <p style={{"color": "#646464"}}>
@@ -84,15 +77,14 @@ function AgentMtpMenu({setLargeContentClass, largeContentClass}) {
                         
                 </div>
                 </section>
-                <MinimisedSideBar role={Agent_mtp}/>
+                <MinimisedSideBar role={Agent_mtp_comprehensive_windscreen}/>
                 <footer>
                         <ul>
                             <li><Link to="/admin/settings">Settings</Link></li>
                             <li><Link to="/logout"><MdLogout /> Logout</Link></li>
                         </ul>
                     <Link to={'/admin-settings'} id="account">
-                        <img src={authentication.currentUser.photoURL} alt='profile'/>
-                        {/* <DefaultAvatar /> */}
+                        <DefaultAvatar />
                     </Link>
                 </footer>
             </nav>
@@ -101,4 +93,4 @@ function AgentMtpMenu({setLargeContentClass, largeContentClass}) {
     )
 }
 
-export default AgentMtpMenu
+export default AgentMtpCompWindMenu
