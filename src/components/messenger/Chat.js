@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { db, collection, authentication } from '../../helpers/firebase';
+import { functions ,authentication, db} from '../../helpers/firebase';
+import { httpsCallable } from 'firebase/functions';
 
 import SendMessage from './SendMessage';
 
@@ -11,6 +12,10 @@ import {BiSearchAlt2} from 'react-icons/bi'
 
 import './messenger.css'
 
+import useAuth from '../../contexts/Auth'
+import { 
+    collection, getDocs,
+} from 'firebase/firestore'
 
 
 
@@ -19,6 +24,7 @@ function Chat() {
     const [ acceptedChats, setAcceptedChats ] = useState([{name:"Kizito Douglas"}, {name:"Nakityo Joanita"}, {name:"Anyuru David Derrick"}, {name:"Charles Kasasira Derrick"}])
 
     const [ search, setSearch ] = useState(false)
+    const [ allMessages, setAllMessages] = useState([])
     const [ displayMessages, setDisplayMessages ] = useState(false)
     const [ messages, setMessages ] = useState([{text:'Hello', uid: "001", date:"Jan 24 2009", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUid:"09398938"}, {text:'Hi', uid:"002", date:"Aug 23, 2021", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUId:"09398938"},{text: "How're you doing? How was your day? Hope everything is okay. I would like to know you in person.", uid:"003", date:"Mar 21, 2022", sendersUid:"09398938", receiversUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3"}, {text:"I was supposed to come today but unfortunately. My puppy Machelle, fell sick and had to be rushed to the hospital. He started convulsing all of a sudden", date:"Jan 4, 2022", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUid:"09398938"}])
     const [ sender, setSender ] = useState('Default Supervisor')
@@ -28,15 +34,58 @@ function Chat() {
     const [ expanded, setExpanded ] = useState(false)
 
     const scroll = useRef()
+    const { authClaims } = useAuth()
 
-    // useEffect(()=> {
-    //     db.collection('messages').orderBy('createdAt').limit(50).onSnapshot(snapshot => {
-    //         setMessages(snapshot.docs.map(doc => doc.data()))
-    //     })
-        
+    useEffect(async ()=> {
+        console.log(authentication.currentUser)
+        await process()
+    }, [])
 
-    // }, [])
-  return (     
+    const process = async() => {            
+        const listUsers = httpsCallable(functions,'listUsers')
+        listUsers().then(({ data }) => {
+            if(authClaims?.supervisor) {
+              const myAgents = data.filter(user => user.role.agent === true && user?.meta.added_by_uid === authentication.currentUser.uid)
+              const incharge = data.filter(user => user.uid === data.filter(user => user.uid === authentication.currentUser.uid)[0].meta.added_by_uid)
+              
+              setAcceptedChats([...myAgents, ...incharge])
+              console.log([...myAgents, ...incharge])
+              return myAgents
+    
+            } else if (authClaims?.admin) {
+              const incharge = data.filter(user => user.uid === data.filter(user => user.uid ===  authentication.currentUser.uid)[0].meta.added_by_uid)
+              const supervisors = data.filter( user => user?.role?.supervisor === true && user?.meta?.added_by_uid === authentication.currentUser.uid)
+              const myAgents = data.filter(user => user?.role?.agent === true && user?.meta?.added_by_uid === authentication.currentUser.uid)
+              console.log([...supervisors, ...myAgents, ...incharge])
+
+              setAcceptedChats([...supervisors, ...myAgents, ...incharge])
+              return [...supervisors, ...myAgents, ...incharge]
+
+            } else if (authClaims?.superAdmin) {
+                const supervisorsAdmins = data.filter( user => user?.role?.admin === true && user?.meta?.added_by_uid === authentication.currentUser.uid)
+                const myAgents = data.filter( user => user?.role?.agent === true && user?.meta?.added_by_uid === authentication.currentUser.uid)
+                console.log([...supervisorsAdmins, ...myAgents])
+
+                setAcceptedChats([...myAgents, ...supervisorsAdmins])
+                return [...myAgents, ...supervisorsAdmins]
+            }
+        }).then(async (capables) => {
+            console.log(capables)
+            const data = await getMessages(collection(db, 'messages'))
+
+        }).catch((error) => {
+            console.log(error)
+        })
+      }
+
+      const getMessages = async (messagesRef) => {
+          const data = await getDocs(messagesRef)
+          console.log(data)
+          return data
+      }
+
+
+    return (     
         <div id="chatbox" style={{display:"flex", flexDirection:"column", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", width:"350px"}} className="shadow-sm collapse-chatbox" >
             {
                 selectChat === false 

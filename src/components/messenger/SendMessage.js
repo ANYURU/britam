@@ -8,6 +8,7 @@ function SendMessage({scroll}) {
     
     const sendMessage = async (event) => {
         event.preventDefault();
+        
 
         scroll.current.scrollIntoView({bahavior: 'smooth'})
         return await "done"
