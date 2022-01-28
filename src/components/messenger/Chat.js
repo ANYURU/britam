@@ -1,7 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import {db, collection, authentication} from '../../helpers/firebase';
-
-import {Modal} from 'react-bootstrap'
+import { db, collection, authentication } from '../../helpers/firebase';
 
 import SendMessage from './SendMessage';
 
@@ -9,6 +7,7 @@ import {IoArrowBackOutline} from 'react-icons/io5'
 import {FaAngleDoubleDown, FaAngleDoubleUp} from 'react-icons/fa'
 import {BiEnvelope} from 'react-icons/bi'
 import {IoCloseSharp} from 'react-icons/io5'
+import {BiSearchAlt2} from 'react-icons/bi'
 
 import './messenger.css'
 
@@ -16,16 +15,18 @@ import './messenger.css'
 
 
 function Chat() {
+
     const [ acceptedChats, setAcceptedChats ] = useState([{name:"Kizito Douglas"}, {name:"Nakityo Joanita"}, {name:"Anyuru David Derrick"}, {name:"Charles Kasasira Derrick"}])
 
     const [ search, setSearch ] = useState(false)
     const [ displayMessages, setDisplayMessages ] = useState(false)
     const [ messages, setMessages ] = useState([{text:'Hello', uid: "001", date:"Jan 24 2009", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUid:"09398938"}, {text:'Hi', uid:"002", date:"Aug 23, 2021", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUId:"09398938"},{text: "How're you doing? How was your day? Hope everything is okay. I would like to know you in person.", uid:"003", date:"Mar 21, 2022", sendersUid:"09398938", receiversUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3"}, {text:"I was supposed to come today but unfortunately. My puppy Machelle, fell sick and had to be rushed to the hospital. He started convulsing all of a sudden", date:"Jan 4, 2022", sendersUid:"oxsdUDhbTvMhdDbCRSb2Qaz0IAH3", receiversUid:"09398938"}])
-    const [ user, setUser ] = useState(authentication.currentUser.displayName)
+    const [ sender, setSender ] = useState('Default Supervisor')
     const [ selectedChat, setSelectedChat ] = useState(false)
     const [ selectChat, setSelectChat ] = useState(true)
     const [ previousChats, setPreviousChats ] = useState([{name:"Anyuru David Derrick", uid:"0920290", photoURL:"blablabla"}, {name:"Charles Kasasira Derrick", uid:"223848", photoURL:"tintintin"}  ])
     const [ expanded, setExpanded ] = useState(false)
+
     const scroll = useRef()
 
     // useEffect(()=> {
@@ -44,19 +45,23 @@ function Chat() {
                     <div style={{display:"flex", gap:"5px"}}>
                         <button onClick={() => {
                             setSelectChat(true)
-                            document.getElementById("msg-form").classList.remove("expand-form")
-                            document.getElementById("msg-form").classList.add("collapse-form")
+                            // document.getElementById("msg-form").classList.remove("expand-form")
+                            // document.getElementById("msg-form").classList.add("collapse-form")
+                            document.getElementById("msg-form").classList.add('hide-msg-form')
+                            document.getElementById("msg-form").classList.remove('show-msg-form')
                         }} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
                             <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><IoArrowBackOutline /></i>
                         </button>
                         <div style={{paddingTop:"5px"}}>
-                            {user}  
+                            {sender}  
                         </div>
                     </div>
                     <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none", marginRight:"20px"}} onClick={()=>{
                         if(expanded === false) {
                             document.getElementById("chatbox").classList.remove("collapse-chatbox")
-                            document.getElementById("msg-form").classList.remove("collapse-form")
+                            // document.getElementById("msg-form").classList.remove("collapse-form")
+                            document.getElementById("msg-form").classList.remove("hide-msg-form")
+                            document.getElementById("msg-form").classList.add("show-msg-form")
                             setExpanded(!expanded)
                         } else {
                             document.getElementById("chatbox").classList.add("collapse-chatbox")
@@ -74,7 +79,15 @@ function Chat() {
                     </div>
                     <div style={{display:"flex", gap:"5px"}}>
                         {
-                            search === true && <input />
+                            search === true && 
+                            <div style={{display:"flex", width:"160px", justifyContent:"space-between"}}>
+                                <div style={{height:"30px", width:"30px"}}>
+                                    <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9", color:"#4aaef2"}}><BiSearchAlt2 /></i>     
+                                </div>
+                                <div>
+                                    <input style={{borderBottom:"1px solid #1d9bf0", width:"120px", paddingLeft:"10px"}}id="search-users" className="search-chats"/>
+                                </div>
+                            </div>
                         }
                         <button onClick={() => {
                             setSearch(!search)
@@ -84,7 +97,9 @@ function Chat() {
                         <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none", marginRight:"20px"}} onClick={()=>{
                             if(expanded === false) {
                                 document.getElementById("chatbox").classList.remove("collapse-chatbox")
-                                document.getElementById("msg-form").classList.add("collapse-form")
+                                // document.getElementById("msg-form").classList.add("collapse-form")
+                                document.getElementById("msg-form").classList.add("hide-msg-form")
+                                document.getElementById("msg-form").classList.remove("show-msg-form")
                                 setExpanded(!expanded)
                             } else {
                                 document.getElementById("chatbox").classList.add("collapse-chatbox")
@@ -115,8 +130,9 @@ function Chat() {
                                         return (
                                             <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={() => {
                                                 setSelectChat(!selectChat)
-                                                document.getElementById("msg-form").classList.add("expand-form")
-                                                document.getElementById("msg-form").classList.remove("collapse-form")
+                                                // document.getElementById("msg-form").classList.add("expand-form")
+                                                // document.getElementById("msg-form").classList.remove("collapse-form")
+                                                document.getElementById("msg-form").classList.remove('hide-msg-form')
                                             }}>
                                                 <div>
                                                     <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
@@ -140,6 +156,7 @@ function Chat() {
                                     return (
                                         <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={() => {
                                             setSelectChat(!selectChat)
+                                            document.getElementById("msg-form").classList.remove('hide-msg-form')
                                         }}>
                                             <div>
                                                 <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>

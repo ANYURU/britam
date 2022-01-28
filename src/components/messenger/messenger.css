@@ -3,6 +3,9 @@ input:focus {
     border: none;
 }
 
+input {
+    border:none;
+}
 
 form {
     margin-top:-20px;
@@ -18,4 +21,17 @@ form {
 
 .expand-form {
     height:60px;
+}
+
+#search-users:focus {
+    outline: none !important;
+    border: none;
+}
+
+.hide-msg-form {
+    visibility: hidden;
+}
+
+.show-msg-form {
+    visibility: initial;
 }
