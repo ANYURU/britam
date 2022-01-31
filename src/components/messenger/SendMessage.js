@@ -11,16 +11,19 @@ import './messenger.css'
 
 
 function SendMessage({scroll, receiver, messages}) {
+    console.log(receiver)
 
     useEffect(
         () => {
             const { uid, photoURL } = authentication.currentUser
         }
-    )
-    const [message, setMessage] = useState('')
-
-    const messagesCollectionRef = collection(db, "messages")
+        )
+        const [message, setMessage] = useState('')
+        
+        const messagesCollectionRef = collection(db, "messages")
+        
     const sendMessage = async (event) => {
+        console.log(messages)
         event.preventDefault();
         console.log(receiver)
 
@@ -37,7 +40,6 @@ function SendMessage({scroll, receiver, messages}) {
 
         console.log(
             {
-                name: receiver.name,
                 sendersUid: uid,
                 photoURL: photoURL,
                 message: message,

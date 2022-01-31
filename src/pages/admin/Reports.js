@@ -106,7 +106,7 @@ function Reports() {
   // filter by range
   const [ dateFrom, setDateFrom ] = useState(null)
   const [ dateTo, setDateTo ] = useState(null)
-
+  const [ switchStatus, setSwitchStatus ] = useState(null)
 
 
   // pagination
@@ -122,7 +122,8 @@ function Reports() {
                         .filter(policy => !selectedMonth && policy.policyStartDate !== undefined || policy.policyStartDate.substring(5, 7) === selectedMonth)
                         .filter(policy => !selectedYear || policy.policyStartDate.substring(0, 4) === selectedYear)
                         .filter(policy => !dateFrom || policy.policyStartDate >= dateFrom)
-                        .filter(policy => !dateTo || policy.policyStartDate <= dateTo))
+                        .filter(policy => !dateTo || policy.policyStartDate <= dateTo)
+                        .filter(policy => !switchStatus || policy.stickersDetails[0].status === switchStatus))
   
   const paginatedShownPolicies = !policies || shownPolicies.slice(indexOfFirstPolicy, indexOfLastPolicy)
 
@@ -131,6 +132,7 @@ function Reports() {
   
   const totalPagesNum = !policies || Math.ceil(shownPolicies.length / policiesPerPage)
 
+  console.log(policies)
 
 
   return (
@@ -147,14 +149,14 @@ function Reports() {
                 placeholder={"Search for Report"} value={searchText} handleSearch={handleSearch}
               />
               <div></div>
-              <CSVLink
-                data={policies}
-                filename={"Britam-Reports.csv"}
-                className="btn btn-primary cta"
-                target="_blank"
-              >
-                Export <MdDownload />
-              </CSVLink>
+                <CSVLink
+                  data={policies}
+                  filename={"Britam-Reports.csv"}
+                  className="btn btn-primary cta"
+                  target="_blank"
+                >
+                  Export <MdDownload />
+                </CSVLink>
             </div>
 
             <div style={{display: "flex", alignItems: "center"}}>  
@@ -172,13 +174,14 @@ function Reports() {
 
                   <Form.Group className="m-3 categories" width="200px">
                       <Form.Label htmlFor='category'>Status</Form.Label>
-                      <Form.Select aria-label="User role" id='category'>
-                          <option value={null}>Select a status</option>
-                          <option value="new">New</option>
+                      <Form.Select aria-label="User role" id='category' onChange={({target: {value}}) => setSwitchStatus(value)}>
+                          <option value={""}>Select a status</option>
+                          <option value="active">Active</option>
+                          <option value="renewed">Renewed</option>
                           <option value="paid">Paid</option>
+                          <option value="expired">Expired</option>
                           <option value="cancelled">Cancelled</option>
                           <option value="deleted">Deleted</option>
-                          <option value="expired">Expired</option>
                       </Form.Select>
                   </Form.Group>
             </div>
@@ -284,7 +287,7 @@ function Reports() {
                                   <td>35,000</td>
                                   <td>2,191</td>
                                   <td>branch location</td>
-                                  <td>{policy.agentName}</td>
+                                  <td>{policy.added_by_name}</td>
                                   <td>{typeof policy.currency == "string" ? policy.currency : ''}</td>
                                 </tr>
                               </>

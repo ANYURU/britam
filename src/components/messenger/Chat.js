@@ -1,37 +1,41 @@
 import { useEffect, useState, useRef } from 'react';
 import { functions ,authentication, db} from '../../helpers/firebase';
-import { httpsCallable } from 'firebase/functions';
+import { httpsCallable} from 'firebase/functions';
+import { serverTimestamp } from 'firebase/firestore';
 
-import SendMessage from './SendMessage';
+// import SendMessage from './SendMessage';
 
 import {IoArrowBackOutline} from 'react-icons/io5'
 import {FaAngleDoubleDown, FaAngleDoubleUp} from 'react-icons/fa'
 import {BiEnvelope} from 'react-icons/bi'
 import {IoCloseSharp} from 'react-icons/io5'
 import {BiSearchAlt2} from 'react-icons/bi'
+import {AiOutlineSend} from 'react-icons/ai';
 
 import './messenger.css'
 
 import useAuth from '../../contexts/Auth'
 import { 
+    addDoc,
     collection, getDocs, onSnapshot,
 } from 'firebase/firestore'
+
+import { Form } from 'react-bootstrap'
 
 
 
 function Chat() {
 
     const [ acceptedChats, setAcceptedChats ] = useState([])
-
     const [ search, setSearch ] = useState(false)
     const [ allMessages, setAllMessages] = useState([])
-    const [ displayMessages, setDisplayMessages ] = useState(false)
     const [ messages, setMessages ] = useState([])
     const [ sender, setSender ] = useState('Default Supervisor')
-    const [ selectedChat, setSelectedChat ] = useState(false)
     const [ selectChat, setSelectChat ] = useState(true)
     const [ previousChats, setPreviousChats ] = useState([{name:"Anyuru David Derrick", uid:"0920290", photoURL:"blablabla"}, {name:"Charles Kasasira Derrick", uid:"223848", photoURL:"tintintin"}  ])
     const [ expanded, setExpanded ] = useState(false)
+    const [ message, setMessage ] = useState('')
+    
 
     const [ receiversUID, setReceiversUID ] = useState('')
 
@@ -39,15 +43,31 @@ function Chat() {
     const { authClaims } = useAuth()
 
     useEffect(async ()=> {
-        console.log(authentication.currentUser)
         onSnapshot(collection(db, "messages"), (snapshot)=>{
+            console.log(receiversUID)
             setAllMessages(snapshot.docs.map(doc =>  doc.data()))
         })
-        await process()
+        process()
 
     }, [])
 
-    const process = async() => {            
+    
+
+   const sendMessage = async (event) => {
+       event.preventDefault()
+       await addDoc(collection(db, 'messages'), {
+        sendersUID: authentication.currentUser.uid,
+        photoURL: authentication.currentUser.photoURL,
+        createdAt: serverTimestamp(),
+        message: message,
+        receiversUID: receiversUID,
+       }) 
+
+       
+
+   } 
+
+    const process = () => {            
         const listUsers = httpsCallable(functions,'listUsers')
         listUsers().then(({ data }) => {
             if(authClaims?.supervisor) {
@@ -109,6 +129,7 @@ function Chat() {
                             setSelectChat(true)
                             document.getElementById("msg-form").classList.add('hide-msg-form')
                             document.getElementById("msg-form").classList.remove('show-msg-form')
+                            
                         }} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
                             <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><IoArrowBackOutline /></i>
                         </button>
@@ -215,10 +236,12 @@ function Chat() {
                                         console.log(acceptedChats)
                                         return (
                                             <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={async () => {
-                                                setSelectChat(!selectChat)
                                                 document.getElementById("msg-form").classList.remove('hide-msg-form')
-                                                await setReceiversUID(uid)
-                                                setMessages(await allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid))
+                                                setReceiversUID(uid)
+                                                setMessages( allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid))
+                                                // console.log(messages)
+                                                setSelectChat(!selectChat)
+                            
                                             }}>
                                                 <div>
                                                     <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
@@ -229,55 +252,83 @@ function Chat() {
                                             </div>
                                         );
                                     })
+                                    
                                 } 
                             </>
                         }
 
                     </>
+
                     :
-                    messages?.length > 0 && messages.map(({ message, createdAt, sendersUid}, index) => {
-                        if(sendersUid === authentication.currentUser.uid) {
-                            console.log(messages)
-                            return (
-                                <div key={index} style={{marginTop:"20px"}}>
-                                    <div style={{display:"flex", gap:"5px"}}>
-                                        <div style={{display:"flex", alignItems:"end"}}>
-                                            <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>PK</div></div>
+
+                    <>
+                    {console.log(messages)}
+                    {
+
+                        messages?.length > 0 && messages.map(({ message, createdAt, sendersUid}, index) => {
+                            if(sendersUid === authentication.currentUser.uid) {
+                                console.log(messages)
+                                return (
+                                    <div key={index} style={{marginTop:"20px"}}>
+                                        <div style={{display:"flex", gap:"5px"}}>
+                                            <div style={{display:"flex", alignItems:"end"}}>
+                                                <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>PK</div></div>
+                                            </div>
+                                            <div className="msg-container" style={{backgroundColor:"rgb(239, 243, 244)", width:"60%", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomRightRadius:"15px 15px", color:"#0f1419"}}>
+                                                <div style={{padding:"10px"}}>
+                                                    {message}
+                                                </div>
+                                            </div>    
                                         </div>
-                                        <div className="msg-container" style={{backgroundColor:"rgb(239, 243, 244)", width:"60%", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomRightRadius:"15px 15px", color:"#0f1419"}}>
-                                            <div style={{padding:"10px"}}>
+                                        <span style={{display:"flex", width:"60%", paddingLeft:"50px"}}>
+                                            {"13 jan"}
+                                        </span>
+                                    </div>
+                                );
+                            } 
+                            
+                            return (
+                                <div key={index} style={{marginTop:"20px" }}>
+                                    <div className="msg-container" style={{display:"flex", justifyContent:"flex-end", paddingRight:"20px"}}>
+                                        <span className={{width:"60%"}}> 
+                                            <div style={{padding:"10px", width:"180px", backgroundColor:"#1d9bf0", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomLeftRadius:"15px 15px", color:"#fff"}}>
                                                 {message}
                                             </div>
-                                        </div>    
-                                    </div>
-                                    <span style={{display:"flex", width:"60%", paddingLeft:"50px"}}>
-                                        {"13 jan"}
-                                    </span>
+                                            <div style={{display:"flex", justifyContent:"flex-end"}}>
+                                                {"Feb 17"}
+                                            </div>
+                                        </span>
+                                    </div>    
                                 </div>
                             );
-                        } 
-                        
-                        return (
-                            <div key={index} style={{marginTop:"20px" }}>
-                                <div className="msg-container" style={{display:"flex", justifyContent:"flex-end", paddingRight:"20px"}}>
-                                    <span className={{width:"60%"}}> 
-                                        <div style={{padding:"10px", width:"180px", backgroundColor:"#1d9bf0", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomLeftRadius:"15px 15px", color:"#fff"}}>
-                                            {message}
-                                        </div>
-                                        <div style={{display:"flex", justifyContent:"flex-end"}}>
-                                            {"Feb 17"}
-                                        </div>
-                                    </span>
-                                </div>    
-                            </div>
-                        );
-                    })
+                        })
+                    }
+                    </>
                 }
                     
             </div>
-            <div id="msg-form" style={{width:"100%", backgroundColor:"white", borderTop:"solid 1px #eff3f4", height:"50px"}}>
-                <SendMessage scroll={scroll} receiver={receiversUID} messages={messages}/>
-            </div>
+                <div id="msg-form" style={{width:"100%", backgroundColor:"white", borderTop:"solid 1px #eff3f4", height:"50px"}}>
+                    <Form onSubmit={sendMessage} name="msgForm" id="msgForm">
+                        <Form.Group controlId="message">
+                            <div style={{display:"flex", gap:"5px", alignItems:"center", justifyContent:"space-between"}}>
+                                <div style={{borderRadius:"20px", border:"1px solid #e2e8eb", height:"30px", alignItems:"center", paddingLeft:"10px", display:"flex", width:"200px"}}>
+                                    <input type="text" value={message} placeholder="Start a new message" onChange={({target}) => {
+                                        setMessage(target.value)
+                                        console.log(receiversUID)
+                                        onSnapshot(collection(db, "messages"), (snapshot)=>{
+                                            console.log(receiversUID)
+                                            setMessages(snapshot.docs.map(doc =>  doc.data()).filter(message => message?.receiversUID === receiversUID).filter(message => message?.sendersUID === authentication.currentUser.uid))
+                                        })
+                                        // console.log(messages)
+                                    } }  style={{backgroundColor:"#f7f9f9", height:"20px", border:"none"}}/>
+                                </div>
+                                <button type="submit" style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
+                                    <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><AiOutlineSend style={{color:"#1d9bf0"}}/></i>
+                                </button>
+                            </div>
+                        </Form.Group>
+                    </Form>
+                </div>
             <div ref={scroll}></div>
         </div>  
       
