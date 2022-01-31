@@ -17,7 +17,7 @@ import './messenger.css'
 import useAuth from '../../contexts/Auth'
 import { 
     addDoc,
-    collection, getDocs, onSnapshot,
+    collection, onSnapshot, query, orderBy
 } from 'firebase/firestore'
 
 import { Form } from 'react-bootstrap'
@@ -30,7 +30,7 @@ function Chat() {
     const [ search, setSearch ] = useState(false)
     const [ allMessages, setAllMessages] = useState([])
     const [ messages, setMessages ] = useState([])
-    const [ sender, setSender ] = useState('Default Supervisor')
+    const [ receiver, setReceiver ] = useState('Default Supervisor')
     const [ selectChat, setSelectChat ] = useState(true)
     const [ previousChats, setPreviousChats ] = useState([{name:"Anyuru David Derrick", uid:"0920290", photoURL:"blablabla"}, {name:"Charles Kasasira Derrick", uid:"223848", photoURL:"tintintin"}  ])
     const [ expanded, setExpanded ] = useState(false)
@@ -43,9 +43,11 @@ function Chat() {
     const { authClaims } = useAuth()
 
     useEffect(async ()=> {
-        onSnapshot(collection(db, "messages"), (snapshot)=>{
-            console.log(receiversUID)
-            setAllMessages(snapshot.docs.map(doc =>  doc.data()))
+        onSnapshot(collection(db, "messages"), (snapshot)=> {
+            const data = snapshot.docs.map(doc =>  doc.data()) 
+            setAllMessages(data)
+        
+            
         })
         process()
 
@@ -63,8 +65,7 @@ function Chat() {
         receiversUID: receiversUID,
        }) 
 
-       
-
+       setMessage('')
    } 
 
     const process = () => {            
@@ -105,15 +106,6 @@ function Chat() {
         })
       }
 
-      const getMessages = async (messagesRef) => {
-        //   const data = await getDocs(messagesRef)
-          const messagesData = onSnapshot(messagesRef, (snapshot) => {
-              return snapshot.docs.map((doc) => doc.data())
-          })
-        //   const messagesData = data.docs.map((doc) => doc.data())
-          return await messagesData
-      }
-
       
       
 
@@ -134,7 +126,7 @@ function Chat() {
                             <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><IoArrowBackOutline /></i>
                         </button>
                         <div style={{paddingTop:"5px"}}>
-                            {sender}  
+                            {receiver}  
                         </div>
                     </div>
                     <button style={{height:"30px", width:"30px", borderRadius:"50%", border:"none", marginRight:"20px"}} onClick={()=>{
@@ -207,6 +199,7 @@ function Chat() {
                                         photoURL,
                                         uid
                                     }, index) => {
+                                        console.log(name)
                                         return (
                                             <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={async () => {
                                                 setSelectChat(!selectChat)
@@ -233,14 +226,16 @@ function Chat() {
                                         photoURL,
                                         uid
                                     }, index) => {
-                                        console.log(acceptedChats)
+                                        console.log(name)
+                                        // setReceiver(name)
                                         return (
                                             <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={async () => {
                                                 document.getElementById("msg-form").classList.remove('hide-msg-form')
                                                 setReceiversUID(uid)
-                                                setMessages( allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid))
+                                                setMessages( allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid).sort((a, b) => a.createdAt.seconds - b.createdAt.seconds))
                                                 // console.log(messages)
                                                 setSelectChat(!selectChat)
+                                                setReceiver(name)
                             
                                             }}>
                                                 <div>
@@ -307,24 +302,31 @@ function Chat() {
                 }
                     
             </div>
-                <div id="msg-form" style={{width:"100%", backgroundColor:"white", borderTop:"solid 1px #eff3f4", height:"50px"}}>
+                <div id="msg-form" style={{width:"100%", backgroundColor:"white", borderTop:"solid 1px #eff3f4", height:"50px", paddingLeft: "10px"}}>
                     <Form onSubmit={sendMessage} name="msgForm" id="msgForm">
                         <Form.Group controlId="message">
                             <div style={{display:"flex", gap:"5px", alignItems:"center", justifyContent:"space-between"}}>
-                                <div style={{borderRadius:"20px", border:"1px solid #e2e8eb", height:"30px", alignItems:"center", paddingLeft:"10px", display:"flex", width:"200px"}}>
+                                <div style={{borderRadius:"20px", border:"1px solid #e2e8eb", height:"30px", alignItems:"center", paddingLeft:"10px", display:"flex", width:"230px"}}>
                                     <input type="text" value={message} placeholder="Start a new message" onChange={({target}) => {
                                         setMessage(target.value)
                                         console.log(receiversUID)
                                         onSnapshot(collection(db, "messages"), (snapshot)=>{
                                             console.log(receiversUID)
-                                            setMessages(snapshot.docs.map(doc =>  doc.data()).filter(message => message?.receiversUID === receiversUID).filter(message => message?.sendersUID === authentication.currentUser.uid))
+                                            setMessages(snapshot.docs.map(doc =>  doc.data()).filter(message => message?.receiversUID === receiversUID).filter(message => message?.sendersUID === authentication.currentUser.uid).sort((a, b) => a?.createdAt?.seconds - b?.createdAt?.seconds))
                                         })
                                         // console.log(messages)
                                     } }  style={{backgroundColor:"#f7f9f9", height:"20px", border:"none"}}/>
                                 </div>
-                                <button type="submit" style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
-                                    <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><AiOutlineSend style={{color:"#1d9bf0"}}/></i>
-                                </button>
+                                {
+                                    message.length > 0 ?
+                                        <button type="submit" style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
+                                            <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><AiOutlineSend style={{color:"#1d9bf0"}}/></i>
+                                        </button>
+                                        :
+                                        <button type="submit" style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}} disabled>
+                                            <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}><AiOutlineSend style={{color:"#1d9bf0"}}/></i>
+                                        </button>
+                                }
                             </div>
                         </Form.Group>
                     </Form>
