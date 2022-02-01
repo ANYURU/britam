@@ -1,5 +1,5 @@
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { functions ,authentication, db} from '../../helpers/firebase';
 import { httpsCallable} from 'firebase/functions';
 import { serverTimestamp } from 'firebase/firestore';
@@ -43,7 +43,6 @@ function Chat() {
     
     const [ receiversUID, setReceiversUID ] = useState('')
 
-    const scroll = useRef()
     const { authClaims } = useAuth()
 
     useEffect(async ()=> {
@@ -70,6 +69,8 @@ function Chat() {
        }) 
 
        setMessage('')
+    //    document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight   
+
    } 
 
     const process = () => {            
@@ -161,6 +162,7 @@ function Chat() {
                             document.getElementById("msg-form").classList.add("collapse-form")
                             // document.getElementById('')
                             setExpanded(!expanded)
+                            
                         }
                     }}>
                         <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}>{expanded === true ? <FaAngleDoubleDown /> : <FaAngleDoubleUp />}</i>
@@ -208,7 +210,7 @@ function Chat() {
                 
             }
                 
-            <div style={{height:"400px", width:"300px", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", paddingLeft:"20px", overflow:"scroll", scrollBehavior:"smooth"}}>
+            <div id="display" style={{height:"400px", width:"300px", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", paddingLeft:"20px", overflow:"scroll", scrollBehavior:"smooth"}}>
                 {
                     selectChat === true ? 
                     <>
@@ -227,10 +229,13 @@ function Chat() {
                                         // console.log(acceptedChats.filter(chat => receiversUIDS.includes(chat.uid)))
                                         return (
                                             <div style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={async () => {
-                                                setSelectChat(!selectChat)
                                                 document.getElementById("msg-form").classList.remove('hide-msg-form')
                                                 setReceiversUID(uid)
-                                                setMessages( allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid).sort((a, b) => a.createdAt.seconds - b.createdAt.seconds))
+                                                const sentMessages = await allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid)
+                                                const receivedMessages = await allMessages.filter(message => message?.receiversUID === authentication.currentUser.uid).filter(message => message?.sendersUID === uid)
+                                                setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a.createdAt.seconds - b.createdAt.seconds))
+                                                setSelectChat(!selectChat)
+                                                setReceiver(name)
 
                                             }}>
                                                 <div>
@@ -259,11 +264,8 @@ function Chat() {
                                             <div key={index} style={{display:"flex", gap:"5px", alignItems:"center", cursor:"pointer"}} onClick={async () => {
                                                 document.getElementById("msg-form").classList.remove('hide-msg-form')
                                                 setReceiversUID(uid)
-                                                console.log(allMessages)
                                                 const sentMessages = await allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid)
-                                                console.log(sentMessages)
                                                 const receivedMessages = await allMessages.filter(message => message?.receiversUID === authentication.currentUser.uid).filter(message => message?.sendersUID === uid)
-                                                console.log(receivedMessages)
                                                 setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a.createdAt.seconds - b.createdAt.seconds))
                                                 setSelectChat(!selectChat)
                                                 setReceiver(name)
@@ -289,9 +291,16 @@ function Chat() {
 
                     <>
                     {console.log(messages)}
+                    
                     {
 
                         messages?.length > 0 && messages.map(({ message, createdAt, sendersUID, receiversUID}, index) => {
+                        document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight
+                        let date
+                        if(createdAt !== null) {
+                            date = new Date(createdAt.seconds * 1000)
+                            
+                        }   
                             
                             return (
                                 <>
@@ -306,6 +315,7 @@ function Chat() {
                                                 <div className="msg-container" style={{backgroundColor:"rgb(239, 243, 244)", width:"60%", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomRightRadius:"15px 15px", color:"#0f1419"}}>
                                                     <div style={{padding:"10px"}}>
                                                         {message}
+                                                        {console.log(date)}
                                                     </div>
                                                 </div>    
                                             </div>
@@ -350,10 +360,7 @@ function Chat() {
                                             const sentMessages = data.filter(message => message?.receiversUID === receiversUID).filter(message => message?.sendersUID === authentication.currentUser.uid)
                                             const receivedMessages = data.filter(message => message?.receiversUID === authentication.currentUser.uid).filter(message => message?.sendersUID === receiversUID)
                                             setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a?.createdAt?.seconds - b?.createdAt?.seconds))
-
-                                          // setMessages(snapshot.docs.map(doc =>  doc.data()).filter(message => message?.receiversUID === receiversUID).filter(message => message?.sendersUID === authentication.currentUser.uid).sort((a, b) => a?.createdAt?.seconds - b?.createdAt?.seconds))
                                         })
-                                        // console.log(messages)
                                     } }  style={{backgroundColor:"#f7f9f9", height:"20px", border:"none"}}/>
                                 </div>
                                 {
@@ -370,7 +377,6 @@ function Chat() {
                         </Form.Group>
                     </Form>
                 </div>
-            <div ref={scroll}></div>
         </div>  
       
     );

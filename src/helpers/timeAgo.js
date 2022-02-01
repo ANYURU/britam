@@ -31,4 +31,3 @@ function getFormattedDate(date, preformattedDate = false, hideYear = false) {
     const 
 }
 
-    //    document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight
