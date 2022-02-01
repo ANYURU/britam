@@ -286,6 +286,8 @@ function Chat() {
                     {
 
                         messages?.length > 0 && messages.map(({ message, createdAt, sendersUID, receiversUID}, index) => {
+                           document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight
+
                             
                             return (
                                 <>
@@ -368,3 +370,4 @@ function Chat() {
 }
 
 export default Chat;
+
