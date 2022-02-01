@@ -1,10 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { functions ,authentication, db} from '../../helpers/firebase';
 import { httpsCallable} from 'firebase/functions';
 import { serverTimestamp } from 'firebase/firestore';
-
-// import SendMessage from './SendMessage';
 
 import {IoArrowBackOutline} from 'react-icons/io5'
 import {FaAngleDoubleDown, FaAngleDoubleUp} from 'react-icons/fa'
@@ -24,8 +21,7 @@ import {
 } from 'firebase/firestore'
 
 import { Form } from 'react-bootstrap'
-import { useIsRTL } from 'react-bootstrap/esm/ThemeProvider';
-
+import { getFormattedDate } from '../../helpers/formatDate'
 
 
 function Chat() {
@@ -233,13 +229,13 @@ function Chat() {
                                                 setReceiversUID(uid)
                                                 const sentMessages = await allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid)
                                                 const receivedMessages = await allMessages.filter(message => message?.receiversUID === authentication.currentUser.uid).filter(message => message?.sendersUID === uid)
-                                                setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a.createdAt.seconds - b.createdAt.seconds))
+                                                setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a?.createdAt?.seconds - b?.createdAt?.seconds))
                                                 setSelectChat(!selectChat)
                                                 setReceiver(name)
 
                                             }}>
                                                 <div>
-                                                    <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
+                                                    <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{photoURL !== null ? <img src={photoURL} alt={`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}/> : `${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
                                                 </div>
                                                 <div key={index} style={{marginTop: "25px", display:"flex", alignItems:"center", height:"100%"}}>
                                                     <p>{name}</p>
@@ -266,13 +262,13 @@ function Chat() {
                                                 setReceiversUID(uid)
                                                 const sentMessages = await allMessages.filter(message => message?.receiversUID === uid).filter(message => message?.sendersUID === authentication.currentUser.uid)
                                                 const receivedMessages = await allMessages.filter(message => message?.receiversUID === authentication.currentUser.uid).filter(message => message?.sendersUID === uid)
-                                                setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a.createdAt.seconds - b.createdAt.seconds))
+                                                setMessages([...sentMessages, ...receivedMessages].sort((a, b) => a?.createdAt?.seconds - b?.createdAt?.seconds))
                                                 setSelectChat(!selectChat)
                                                 setReceiver(name)
                             
                                             }}>
                                                 <div>
-                                                    <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
+                                                    <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{photoURL !== null ? <img src={photoURL} alt={`${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}/> : `${name.split(" ")[0][0].toUpperCase()}${name.split(" ")[1][0].toUpperCase()}`}</div></div>
                                                 </div>
                                                 <div  style={{marginTop: "25px", display:"flex", alignItems:"center", height:"100%"}}>
                                                     <p>{name}</p>
@@ -291,16 +287,14 @@ function Chat() {
 
                     <>
                     {console.log(messages)}
-                    
                     {
 
                         messages?.length > 0 && messages.map(({ message, createdAt, sendersUID, receiversUID}, index) => {
-                        document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight
-                        let date
-                        if(createdAt !== null) {
-                            date = new Date(createdAt.seconds * 1000)
-                            
-                        }   
+                            document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight
+                            let date
+                            if(createdAt !== null) {
+                                date = new Date(createdAt.seconds * 1000)    
+                            }   
                             
                             return (
                                 <>
@@ -320,11 +314,10 @@ function Chat() {
                                                 </div>    
                                             </div>
                                             <span style={{display:"flex", width:"60%", paddingLeft:"50px"}}>
-                                                {"13 jan"}
+                                                {getFormattedDate(date)}
                                             </span>
                                         </div>
                                         :
-
                                         <div key={index} style={{marginTop:"20px" }}>
                                             <div className="msg-container" style={{display:"flex", justifyContent:"flex-end", paddingRight:"20px"}}>
                                                 <span className={{width:"60%"}}> 
@@ -332,7 +325,7 @@ function Chat() {
                                                         {message}
                                                     </div>
                                                     <div style={{display:"flex", justifyContent:"flex-end"}}>
-                                                        {"Feb 17"}
+                                                        {getFormattedDate(date)}
                                                     </div>
                                                 </span>
                                             </div>    
