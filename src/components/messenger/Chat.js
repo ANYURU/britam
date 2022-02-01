@@ -26,7 +26,8 @@ import { getFormattedDate } from '../../helpers/formatDate'
 
 function Chat() {
     // const [ receiversUIDS, setReceiversUIDS] = useState([])
-
+    const [ searchKey, setSearchKey ] = useState('')
+    const [ allChats, setAllChats ] = useState([])
     const [ acceptedChats, setAcceptedChats ] = useState([])
     const [ search, setSearch ] = useState(false)
     const [ allMessages, setAllMessages] = useState([])
@@ -44,30 +45,37 @@ function Chat() {
     useEffect(async ()=> {
         onSnapshot(collection(db, "messages"), (snapshot)=> {
             const data = snapshot.docs.map(doc =>  doc.data()) 
-            setAllMessages(data)
-        
-            
+            setAllMessages(data)    
         })
         process()
     }, [])
 
     
 
-   const sendMessage = async (event) => {
-       event.preventDefault()
-       await addDoc(collection(db, 'messages'), {
-        sendersUID: authentication.currentUser.uid,
-        photoURL: authentication.currentUser.photoURL,
-        createdAt: serverTimestamp(),
-        message: message,
-        receiversUID: receiversUID,
-        receiversName: receiver
-       }) 
+    const sendMessage = async (event) => {
+        event.preventDefault()
+        await addDoc(collection(db, 'messages'), {
+            sendersUID: authentication.currentUser.uid,
+            photoURL: authentication.currentUser.photoURL,
+            createdAt: serverTimestamp(),
+            message: message,
+            receiversUID: receiversUID,
+            receiversName: receiver
+        }) 
 
-       setMessage('')
-    //    document.getElementById('display').scrollTop = document.getElementById('display').scrollHeight   
+        setMessage('')
+    } 
 
-   } 
+    const filterAcceptedChats = ({target:{ value }}) => {
+        setSearchKey(value)
+        console.log(acceptedChats)
+        const chats = allChats.filter(chat => {
+            return chat?.name.toLowerCase().includes(value.toLowerCase())
+        })
+        setAcceptedChats(chats)
+
+
+    }
 
     const process = () => {            
         const listUsers = httpsCallable(functions,'listUsers')
@@ -115,17 +123,14 @@ function Chat() {
            const receivers = messages.filter(message => message?.sendersUID === authentication.currentUser.uid).map(message => message.receiversUID)
            const uids = [...new Set(receivers)]
            setPreviousChats(capables.filter(capable => uids.includes(capable.uid)))   
-           setAcceptedChats(capables)     
+           setAcceptedChats(capables)  
+           setAllChats(capables)   
 
         
         }).catch((error) => {
             console.log(error)
         })
       }
-
-      
-      
-
 
     return (     
         <div id="chatbox" style={{display:"flex", flexDirection:"column", backgroundColor:"white", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", width:"350px"}} className="shadow-sm collapse-chatbox" >
@@ -177,12 +182,13 @@ function Chat() {
                                     <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9", color:"#4aaef2"}}><BiSearchAlt2 /></i>     
                                 </div>
                                 <div>
-                                    <input style={{borderBottom:"1px solid #1d9bf0", width:"120px", paddingLeft:"10px"}}id="search-users" className="search-chats"/>
+                                    <input style={{borderBottom:"1px solid #1d9bf0", width:"120px", paddingLeft:"10px"}}id="search-users" className="search-chats" value={searchKey} onChange={filterAcceptedChats}/>
                                 </div>
                             </div>
                         }
                         <button onClick={() => {
                             setSearch(!search)
+                            setSearchKey('')
                         }} style={{height:"30px", width:"30px", borderRadius:"50%", border:"none"}}>
                             <i style={{height:"100%", width:"100%", display:"flex", justifyContent:"center", alignItems:"center", borderRadius:"50%", backgroundColor:"#f7f9f9"}}>{search === true ? <IoCloseSharp /> : <BiEnvelope />}</i>
                         </button>
@@ -306,14 +312,14 @@ function Chat() {
                                                 <div style={{display:"flex", alignItems:"end"}}>
                                                     <div style={{width:"40px",  height:"40px", borderRadius:"50%", backgroundColor:"gray", opacity:"0.2", display:"flex", justifyContent:"center", alignItems:"center"}}><div>{`${receiver.split(' ')[0][0]}${receiver.split(' ')[1][0]}`}</div></div>
                                                 </div>
-                                                <div className="msg-container" style={{backgroundColor:"rgb(239, 243, 244)", width:"60%", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomRightRadius:"15px 15px", color:"#0f1419"}}>
+                                                <div className="msg-container" style={{backgroundColor:"rgb(239, 243, 244)", width:"60%", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomRightRadius:"15px 15px", color:"#0f1419", fontSize:"15px"}}>
                                                     <div style={{padding:"10px"}}>
                                                         {message}
                                                         {console.log(date)}
                                                     </div>
                                                 </div>    
                                             </div>
-                                            <span style={{display:"flex", width:"60%", paddingLeft:"50px"}}>
+                                            <span style={{display:"flex", width:"60%", paddingLeft:"50px", color:"#536471", fontSize:"11px"}}>
                                                 {getFormattedDate(date)}
                                             </span>
                                         </div>
@@ -321,10 +327,10 @@ function Chat() {
                                         <div key={index} style={{marginTop:"20px" }}>
                                             <div className="msg-container" style={{display:"flex", justifyContent:"flex-end", paddingRight:"20px"}}>
                                                 <span className={{width:"60%"}}> 
-                                                    <div style={{padding:"10px", width:"180px", backgroundColor:"#1d9bf0", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomLeftRadius:"15px 15px", color:"#fff"}}>
+                                                    <div style={{padding:"10px", width:"180px", backgroundColor:"#1d9bf0", borderTopLeftRadius:"15px 15px", borderTopRightRadius:"15px 15px", borderBottomLeftRadius:"15px 15px", color:"#fff", fontSize:"15px"}}>
                                                         {message}
                                                     </div>
-                                                    <div style={{display:"flex", justifyContent:"flex-end"}}>
+                                                    <div style={{display:"flex", justifyContent:"flex-end", color:"#536471", fontSize:"11px"}}>
                                                         {getFormattedDate(date)}
                                                     </div>
                                                 </span>
