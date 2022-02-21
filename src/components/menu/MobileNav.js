@@ -83,28 +83,33 @@ export default function MobileNav ({role, user, displayName }) {
                                                 <div>
                                                     <span>{menuItem.icon}</span>{menuItem.name}
                                                             
-                                                    {menuItem?.subMenu  && menuItem?.number && 
-                                                    <>
-                                                        
-                                                        <span>{subMenu === false ? <BsFillCaretDownFill style={{fontSize:"10px"}}/> : <BsFillCaretUpFill style={{fontSize:"10px"}}/>}</span>
-                                                        {
-                                                            subMenu === true && selectedItemNumber === menuItem.number &&
-                                                            <ul className="nav flex-column" style={{paddingTop:"5px", paddingLeft:"130px"}}>
-                                                                {menuItem.subMenu.map((sub, index) => (  
-                                                                    <li>
-                                                                        <Link to={sub.link} key={index} style={{backgroundColor:"#1475cf", textDecoration:"none", color:"#ffffff", fontSize:"13px"}} onClick={() => {
-                                                                            document.getElementById('offcanvasNavbar').style.display='none'
-                                                                            document.getElementsByClassName('show')[0].style.display='none'
-                                                                            setSubMenu(false)
-                                                                        }}>
-                                                                        {sub.name}
-                                                                        </Link>
-                                                                    </li>
-                                        
-                                                                ))}
-                                                            </ul>    
-                                                        }
-                                                    </>}      
+                                                    {
+                                                        menuItem?.subMenu  && menuItem?.number && 
+                                                        <>                                                               
+                                                            {
+                                                                subMenu === true && selectedItemNumber === menuItem.number ?
+                                                                <>
+                                                                <span>{subMenu === false ? <BsFillCaretDownFill style={{fontSize:"10px"}}/> : <BsFillCaretUpFill style={{fontSize:"10px"}}/>}</span>
+                                                                <ul className="nav flex-column" style={{paddingTop:"5px", paddingLeft:"130px"}}>
+                                                                    {menuItem.subMenu.map((sub, index) => (  
+                                                                        <li>
+                                                                            <Link to={sub.link} key={index} style={{backgroundColor:"#1475cf", textDecoration:"none", color:"#ffffff", fontSize:"13px"}} onClick={() => {
+                                                                                document.getElementById('offcanvasNavbar').style.display='none'
+                                                                                document.getElementsByClassName('show')[0].style.display='none'
+                                                                                setSubMenu(false)
+                                                                            }}>
+                                                                            {sub.name}
+                                                                            </Link>
+                                                                        </li>
+                                            
+                                                                    ))}
+                                                                </ul>
+                                                                </> 
+                                                                :
+                                                                <span><BsFillCaretDownFill style={{fontSize:"10px"}}/></span>
+                                                            }      
+                                                        </>
+                                                    }      
                                                 </div>       
                                             </Link>
                                         </li>
