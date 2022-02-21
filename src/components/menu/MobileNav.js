@@ -75,10 +75,13 @@ export default function MobileNav ({role, user, displayName }) {
                                                 setSelectedItemNumber(menuItem.number)
                                                 toggleActive(index)   
                                                 setSubMenu(!subMenu) 
-                                                // return index                                   
-                                                }}>
-                                                    
-
+                                                if(!menuItem?.subMenu) {
+                                                    document.getElementById('offcanvasNavbar').style.display='none'
+                                                    document.getElementsByClassName('show')[0].style.display='none'
+                                                }
+                                            }}>
+                                            
+                                            
                                                 <div>
                                                     <span>{menuItem.icon}</span>{menuItem.name}
                                                             
