@@ -302,8 +302,12 @@
         width: 260px;
     }
 
-   #chatbox {
+   /* #chatbox {
        margin-right:34px;
+   } */
+
+   #chatbox {
+       margin-right: 75px;
    }
 
 

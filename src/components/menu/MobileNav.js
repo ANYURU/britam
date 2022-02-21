@@ -32,7 +32,6 @@ export default function MobileNav ({role, user, displayName }) {
     const toggleActive = index => {
         // setIndex(selected.role[index][number])
         setSelected({...selected, activeObject: selected.role[index]})
-        console.log(selected.role[index])
         sessionStorage.setItem('session1', selected.role[index]["number"])
     }
 
@@ -96,7 +95,7 @@ export default function MobileNav ({role, user, displayName }) {
                                                                             <Link to={sub.link} key={index} style={{backgroundColor:"#1475cf", textDecoration:"none", color:"#ffffff", fontSize:"13px"}} onClick={() => {
                                                                                 document.getElementById('offcanvasNavbar').style.display='none'
                                                                                 document.getElementsByClassName('show')[0].style.display='none'
-                                                                                setSubMenu(false)
+                                                                                setSubMenu(!subMenu)
                                                                             }}>
                                                                             {sub.name}
                                                                             </Link>

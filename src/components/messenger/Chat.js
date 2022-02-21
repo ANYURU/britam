@@ -49,7 +49,7 @@ function Chat() {
 
     useEffect(()=> {
         process()
-        return () => process()
+        return async () => await process()
     }, [])
 
     

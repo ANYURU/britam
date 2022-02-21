@@ -255,7 +255,7 @@ export default function Mtp({parent_container}) {
         <div id="add_client_group">
           <div></div>
           <Link to="/supervisor/add-comprehensive" className="classic">
-            <button className="btn btn-primary cta">Add Comprehensive</button>
+            <button className="btn btn-primary cta m-2">Add Comprehensive</button>
           </Link>
         </div>
       }
@@ -264,7 +264,7 @@ export default function Mtp({parent_container}) {
         <div id="add_client_group">
           <div></div>
           <Link to="/agent/add-comprehensive" className="classic">
-            <button className="btn btn-primary cta">Add Comprehensive</button>
+            <button className="btn btn-primary m-2 cta">Add Comprehensive</button>
           </Link>
         </div>
       }
