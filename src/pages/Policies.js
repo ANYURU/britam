@@ -16,6 +16,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 import Chat from '../components/messenger/Chat'
+import '../styles/ctas.css'
 
 // import { FaSolarPanel } from 'react-icons/fa'
 // import AddClient from '../parts/AddClient'
