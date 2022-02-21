@@ -17,6 +17,7 @@ export default function MobileNav ({role, user, displayName }) {
     const [ selected, setSelected ] = useState({ activeObject: null, role })
     const [ show, handleShow, handleClose ] = useDialog();
     const [ subMenu, setSubMenu ] = useState(false)
+    const [selectedItemNumber, setSelectedItemNumber] = useState(0)
 
     if(show){
         window.onclick = (event) => !event.target.matches('.footerContext') ? handleClose() : null 
@@ -29,7 +30,9 @@ export default function MobileNav ({role, user, displayName }) {
     }, [])
     
     const toggleActive = index => {
+        // setIndex(selected.role[index][number])
         setSelected({...selected, activeObject: selected.role[index]})
+        console.log(selected.role[index])
         sessionStorage.setItem('session1', selected.role[index]["number"])
     }
 
@@ -64,40 +67,48 @@ export default function MobileNav ({role, user, displayName }) {
                         <Offcanvas.Body>
                             <Nav className="justify-content-end flex-grow-1 pe-3">
                                 <ul className="nav flex-column" >
-                                    { selected.role !== null && selected.role.map((menuItem, index) => (
-                                        <ul className='nav-item' key={menuItem.number}> 
-                                            <li to={menuItem.link} className={toggleActiveClassStyle(index)} onClick={() => {
+                                    { selected.role !== null && selected.role.map((menuItem, index) => { 
+
+
+                                        return (
+                                        <li className='nav-item' key={menuItem.number}> 
+                                            <Link to={menuItem.link} className={toggleActiveClassStyle(index)} onClick={() => {
+                                                setSelectedItemNumber(menuItem.number)
                                                 toggleActive(index)   
-                                                setSubMenu(!subMenu)                                       
+                                                setSubMenu(!subMenu) 
+                                                // return index                                   
                                                 }}>
                                                     
 
                                                 <div>
                                                     <span>{menuItem.icon}</span>{menuItem.name}
                                                             
-                                                    {menuItem?.subMenu &&
+                                                    {menuItem?.subMenu  && menuItem?.number && 
                                                     <>
+                                                        
                                                         <span>{subMenu === false ? <BsFillCaretDownFill style={{fontSize:"10px"}}/> : <BsFillCaretUpFill style={{fontSize:"10px"}}/>}</span>
                                                         {
-                                                            subMenu === true && 
-                                                            <div className="nav flex-column" style={{paddingTop:"5px", paddingLeft:"130px"}}>
-                                                                {/* {console.log(menuItem.subMenu)} */}
-                                                                {menuItem.subMenu.map((sub, index) => (
-                                                                    <Link to={sub.link} key={index} style={{backgroundColor:"#1475cf", textDecoration:"none", color:"#ffffff", fontSize:"13px"}} onClick={() => {
-                                                                        document.getElementById('offcanvasNavbar').style.display='none'
-                                                                        document.getElementsByClassName('show')[0].style.display='none'
-                                                                        setSubMenu(false)
-                                                                    }}>
-                                                                    {sub.name}
-                                                                    </Link>
+                                                            subMenu === true && selectedItemNumber === menuItem.number &&
+                                                            <ul className="nav flex-column" style={{paddingTop:"5px", paddingLeft:"130px"}}>
+                                                                {menuItem.subMenu.map((sub, index) => (  
+                                                                    <li>
+                                                                        <Link to={sub.link} key={index} style={{backgroundColor:"#1475cf", textDecoration:"none", color:"#ffffff", fontSize:"13px"}} onClick={() => {
+                                                                            document.getElementById('offcanvasNavbar').style.display='none'
+                                                                            document.getElementsByClassName('show')[0].style.display='none'
+                                                                            setSubMenu(false)
+                                                                        }}>
+                                                                        {sub.name}
+                                                                        </Link>
+                                                                    </li>
+                                        
                                                                 ))}
-                                                            </div>    
+                                                            </ul>    
                                                         }
                                                     </>}      
                                                 </div>       
-                                            </li>
-                                        </ul>
-                                    ))}                                       
+                                            </Link>
+                                        </li>
+                                    )})}                                       
                                 </ul>
                             </Nav>
                         </Offcanvas.Body>
