@@ -453,6 +453,36 @@
     .graph-space {
         height:50vh;
     }
+}
+
+@media (min-width: 1000px) and (max-width:1150px) {
+    .exp {
+        display: flex;
+        /* gap: 20px; */
+        flex-direction: row;
+    }
+         
+    .bin-exp {
+        height: 200px;
+    }
+
+    .coll {
+        display:flex;
+        flex-direction: column;
+    }
+    
+}
+
+@media (max-width: 1000px) {
+    .exp { 
+        display:flex;
+        flex-direction: column;
+    }
+
+    .coll { 
+        display:flex;
+        flex-direction: column;
+    }
 
 
 }

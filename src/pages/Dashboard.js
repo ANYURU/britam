@@ -188,8 +188,8 @@ function Dashboard({parent_container}) {
 
                 <div className="componentsData">
                     <div id="first-row" className={`mb-5 first-row ${parent_container ? 'dashboard-cards' : 'expanded-menu-dashboard-cards'}`}  style={{display:"flex", width: "100%", justifyContent: "space-between"}}>
-                        <div id="bin" className="shadow-sm bg-body rounded first-container">
-                            <div /* className="row-container" */ className="card-row-container">
+                        <div id="bin" className={`shadow-sm bg-body rounded first-container ${!parent_container && 'bin-exp'}`} style={{display:'flex', flexDirection:"row"}}>
+                            <div /* className="row-container" */ className={`card-row-container ${parent_container ?'coll':'exp'}`}>
                                     <div className="col">
                                         <div id="custom-card" className="custom-card m-1" style={{backgroundColor:"#804C75"}}>
                                             <Card.Body className="card-body">
@@ -207,7 +207,7 @@ function Dashboard({parent_container}) {
                                         </div>
                                     </div>
                             </div>
-                            <div /* className="row-container" className=""*/ className="card-row-container">
+                            <div /* className="row-container" className=""*/ className={`card-row-container ${parent_container ?'coll':'exp'}`}>
                                     <div className="col">
                                         <div id="custom-card"className="custom-card m-1" style={{backgroundColor:"#C82E29"}}>
                                             <Card.Body className="card-body">
